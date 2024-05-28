@@ -33,6 +33,8 @@ class DropdownField<T> extends StatefulWidget {
   final Iterable<int>? initialIndexes;
   final ChildBuilder<T> builder;
   final ListBuilder<T>? listBuilder;
+  final Color? selectedColor;
+  final Color? selectedTileColor;
   final OnSelectCallback<T>? onSelect;
   final OnSelectedChangedCallback<T>? onSelectedChanged;
   final Widget Function(BuildContext context)? overlayBuilder;
@@ -50,6 +52,8 @@ class DropdownField<T> extends StatefulWidget {
     this.initialIndexes,
     required this.builder,
     this.listBuilder,
+    this.selectedColor,
+    this.selectedTileColor,
     this.onSelect,
     this.onSelectedChanged,
     this.overlayBuilder,
@@ -101,6 +105,8 @@ class DropdownFieldState<T> extends State<DropdownField> {
       (widget.focusNode ?? focusNode).addListener(_handleFocusChanged);
     }
 
+    if (_overlayEntry != null) _updateOverlay();
+
     super.didUpdateWidget(oldWidget);
   }
 
@@ -139,21 +145,18 @@ class DropdownFieldState<T> extends State<DropdownField> {
 
     final child = widget.materialize ? Material(elevation: 4.0, child: overlayBuilder(context)) : overlayBuilder(context);
 
+    // TODO: determine the height of the child
+    // final position = sizedBox.localToGlobal(Offset.zero);
+    // final size = MediaQuery.of(context).size;
+    // if (position.dy > size.height / 2) dy = -constraints.maxHeight - 4;
+
     final pos = Positioned(
       width: sizedBox.size.width,
-      child: LayoutBuilder(
-        builder: (context, constraints) {
-          // TODO: determine the height of the child
-          // final position = sizedBox.localToGlobal(Offset.zero);
-          // final size = MediaQuery.of(context).size;
-          // if (position.dy > size.height / 2) dy = -constraints.maxHeight - 4;
-          return CompositedTransformFollower(
-            link: _layerLink,
-            showWhenUnlinked: false,
-            offset: Offset(0.0, dy),
-            child: child,
-          );
-        },
+      child: CompositedTransformFollower(
+        link: _layerLink,
+        showWhenUnlinked: false,
+        offset: Offset(0.0, dy),
+        child: child,
       ),
     );
 
@@ -161,12 +164,15 @@ class DropdownFieldState<T> extends State<DropdownField> {
   }
 
   void _onOverlayStateChanged(bool state) {
-    if (state) {
-      _overlayEntry ??= _createOverlayEntry();
+    state ? _updateOverlay() : _overlayEntry?.remove();
+  }
+
+  void _updateOverlay() {
+    SchedulerBinding.instance.addPostFrameCallback((_) {
+      if (_overlayEntry?.mounted == true) _overlayEntry?.remove();
+      _overlayEntry = _createOverlayEntry();
       Overlay.of(context).insert(_overlayEntry!);
-    } else {
-      _overlayEntry?.remove();
-    }
+    });
   }
 
   void _handleFocusChanged() {
@@ -176,21 +182,33 @@ class DropdownFieldState<T> extends State<DropdownField> {
   Widget _getOverlayBuilder(BuildContext context) {
     return ConstrainedBox(
       constraints: BoxConstraints(maxWidth: _width, maxHeight: _height),
-      child: Builder(
-        builder: (_) {
-          if (widget.overlayBuilder != null) {
-            return SingleChildScrollView(child: widget.overlayBuilder!(context));
-          }
+      child: SingleChildScrollView(
+        child: Builder(
+          builder: (_) {
+            if (widget.overlayBuilder != null) {
+              return widget.overlayBuilder!(context);
+            }
 
-          return ListView.separated(
-            itemBuilder: (context, index) {
-              final value = widget.values!.elementAt(index);
-              return _defaultListTile(index, value);
-            },
-            separatorBuilder: (context, index) => const Divider(),
-            itemCount: widget.values!.length,
-          );
-        },
+            final values = widget.values!;
+            return Column(
+              children: [
+                for (var index = 0; index < values.length; index++) ...[
+                  _defaultListTile(index, values.elementAt(index)),
+                  const Divider(height: 0),
+                ],
+              ],
+            );
+
+            // return ListView.separated(
+            //   itemBuilder: (context, index) {
+            //     final value = widget.values!.elementAt(index);
+            //     return _defaultListTile(index, value);
+            //   },
+            //   separatorBuilder: (context, index) => const Divider(),
+            //   itemCount: widget.values!.length,
+            // );
+          },
+        ),
       ),
     );
   }
@@ -199,14 +217,18 @@ class DropdownFieldState<T> extends State<DropdownField> {
     void onTap() {
       setState(() {
         selectedIndexes.contains(index) ? selectedIndexes.remove(index) : selectedIndexes.add(index);
+        widget.onSelectedChanged?.call(Set.from(selectedIndexes), selectedValues);
+        widget.onSelect!(index, value);
       });
-      widget.onSelectedChanged?.call(Set.from(selectedIndexes), selectedValues);
-      widget.onSelect!(index, value);
+      _updateOverlay();
     }
 
     return widget.materialize
         ? ListTile(
             onTap: onTap,
+            selected: selectedIndexes.contains(index),
+            selectedColor: widget.selectedColor ?? Theme.of(context).colorScheme.onPrimary,
+            selectedTileColor: widget.selectedTileColor ?? Theme.of(context).colorScheme.primary,
             title: widget.listBuilder!(context, index, value),
           )
         : GestureDetector(
