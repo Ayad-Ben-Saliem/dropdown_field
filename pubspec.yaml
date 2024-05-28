@@ -1,7 +1,7 @@
 name: dropdown_field
 description: "Beautiful dropdown field widget"
 version: 1.0.0
-homepage:
+homepage: https://github.com/Ayad-Ben-Saliem/dropdown_field
 
 environment:
   sdk: '>=3.3.3 <4.0.0'
