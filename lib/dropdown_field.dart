@@ -921,16 +921,9 @@ class DropdownField<T> extends StatefulWidget {
     this.menuItemPadding = EdgeInsetsDirectional.zero,
     this.elevation = 8,
     this.style,
-    this.decoration = const BoxDecoration(
-      color: Colors.white,
-      border: Border.fromBorderSide(BorderSide(color: Colors.grey, width: 2)),
-      borderRadius: BorderRadius.all(Radius.circular(4.0)),
-    ),
-    this.leading,
-    this.trailing = const Icon(Icons.arrow_drop_down),
+    this.decoration,
     this.disabledColor,
     this.enabledColor,
-    this.iconSize = 24.0,
     this.isDense = false,
     this.isExpanded = false,
     this.height = kFieldHeight,
@@ -953,7 +946,6 @@ class DropdownField<T> extends StatefulWidget {
     // When adding new arguments, consider adding similar arguments to
     // DropdownFormField.
   })  : assert(itemHeight == null || itemHeight >= kMenuItemHeight),
-        _inputDecoration = null,
         _isEmpty = false,
         _isFocused = false;
 
@@ -973,16 +965,8 @@ class DropdownField<T> extends StatefulWidget {
     this.menuItemPadding = EdgeInsetsDirectional.zero,
     this.elevation = 8,
     this.style,
-    this.decoration = const BoxDecoration(
-      color: Colors.white,
-      border: Border.fromBorderSide(BorderSide(color: Colors.grey, width: 2)),
-      borderRadius: BorderRadius.all(Radius.circular(4.0)),
-    ),
-    this.leading,
-    this.trailing = const Icon(Icons.arrow_drop_down),
     this.disabledColor,
     this.enabledColor,
-    this.iconSize = 24.0,
     this.isDense = false,
     this.isExpanded = false,
     this.height = kFieldHeight,
@@ -1002,11 +986,10 @@ class DropdownField<T> extends StatefulWidget {
     this.alignment = AlignmentDirectional.centerStart,
     this.borderRadius,
     this.padding,
-    required InputDecoration inputDecoration,
+    required this.decoration,
     required bool isEmpty,
     required bool isFocused,
   })  : assert(itemHeight == null || itemHeight >= kMenuItemHeight),
-        _inputDecoration = inputDecoration,
         _isEmpty = isEmpty,
         _isFocused = isFocused;
 
@@ -1099,16 +1082,6 @@ class DropdownField<T> extends StatefulWidget {
   /// [ThemeData.textTheme] of the current [Theme].
   final TextStyle? style;
 
-  final Decoration decoration;
-
-  /// The widget to use for insert a widget the begin of [DropdownField].
-  final Widget? leading;
-
-  /// The widget to use for adding a widget the end of [DropdownField].
-  ///
-  /// Defaults to an [Icon] with the [Icons.arrow_drop_down] glyph.
-  final Widget? trailing;
-
   /// The color of any [Icon] descendant of [trailing] if this button is disabled,
   /// i.e. if [onChanged] is null.
   ///
@@ -1124,11 +1097,6 @@ class DropdownField<T> extends StatefulWidget {
   /// [ThemeData.brightness] is [Brightness.light] and to
   /// [Colors.white70] when it is [Brightness.dark]
   final Color? enabledColor;
-
-  /// The size to use for the drop-down button's down arrow icon button.
-  ///
-  /// Defaults to 24.0.
-  final double iconSize;
 
   /// Reduce the button's height.
   ///
@@ -1240,7 +1208,7 @@ class DropdownField<T> extends StatefulWidget {
   /// Defines the corner radii of the menu's rounded rectangle shape.
   final BorderRadius? borderRadius;
 
-  final InputDecoration? _inputDecoration;
+  final InputDecoration? decoration;
 
   final bool _isEmpty;
 
@@ -1277,12 +1245,8 @@ class DropdownFieldState<T> extends State<DropdownField<T>> with WidgetsBindingO
       _internalNode ??= _createFocusNode();
     }
     _actionMap = <Type, Action<Intent>>{
-      ActivateIntent: CallbackAction<ActivateIntent>(
-        onInvoke: (ActivateIntent intent) => _handleTap(),
-      ),
-      ButtonActivateIntent: CallbackAction<ButtonActivateIntent>(
-        onInvoke: (ButtonActivateIntent intent) => _handleTap(),
-      ),
+      ActivateIntent: CallbackAction<ActivateIntent>(onInvoke: (_) => _handleTap()),
+      ButtonActivateIntent: CallbackAction<ButtonActivateIntent>(onInvoke: (_) => _handleTap()),
     };
   }
 
@@ -1335,16 +1299,16 @@ class DropdownFieldState<T> extends State<DropdownField<T>> with WidgetsBindingO
     }
   }
 
-  TextStyle? get _defaultTextStyle {
-    var defaultTextStyle = Theme.of(context).textTheme.titleMedium;
-    defaultTextStyle = defaultTextStyle!.copyWith(
+  TextStyle get _defaultTextStyle {
+    var defaultTextStyle = Theme.of(context).textTheme.titleMedium ?? const TextStyle();
+    defaultTextStyle = defaultTextStyle.copyWith(
       color: widget.enabled ? widget.enabledColor : widget.disabledColor ?? Theme.of(context).disabledColor,
     );
 
     return defaultTextStyle;
   }
 
-  TextStyle? get _textStyle => widget.style ?? _defaultTextStyle;
+  TextStyle get _textStyle => widget.style ?? _defaultTextStyle;
 
   void _handleTap() {
     final List<MenuItem<T>> menuItems = <MenuItem<T>>[
@@ -1391,7 +1355,7 @@ class DropdownFieldState<T> extends State<DropdownField<T>> with WidgetsBindingO
       selectedIndexes: widget.initialSelected.isNotEmpty ? widget.initialSelected : [0],
       elevation: widget.elevation,
       capturedThemes: InheritedTheme.capture(from: context, to: navigator.context),
-      style: _textStyle!,
+      style: _textStyle,
       barrierLabel: MaterialLocalizations.of(context).modalBarrierDismissLabel,
       itemHeight: widget.itemHeight,
       itemConstraints: widget.itemConstraints,
@@ -1434,9 +1398,9 @@ class DropdownFieldState<T> extends State<DropdownField<T>> with WidgetsBindingO
   // Similarly, we don't reduce the height of the button so much that its icon
   // would be clipped.
   double get _denseButtonHeight {
-    final double fontSize = _textStyle!.fontSize ?? Theme.of(context).textTheme.titleMedium!.fontSize!;
+    final double fontSize = _textStyle.fontSize ?? Theme.of(context).textTheme.titleMedium!.fontSize!;
     final double scaledFontSize = MediaQuery.textScalerOf(context).scale(fontSize);
-    return math.max(scaledFontSize, math.max(widget.iconSize, kDenseButtonHeight));
+    return math.max(scaledFontSize, kDenseButtonHeight);
   }
 
   Color get _iconColor {
@@ -1481,16 +1445,14 @@ class DropdownFieldState<T> extends State<DropdownField<T>> with WidgetsBindingO
 
     if (widget.refreshDropdownMenuItemsOnChange) _buildDropdownMenuItems();
 
+    return _buildChild(context);
+  }
+  
+  Widget _buildChild(BuildContext context) {
     Widget child;
-    if (selectedIndexes.isEmpty && (widget.hint != null || widget.disabled && widget.disabledHint != null)) {
-      // Add hist widget
-
-      var hintWidget = widget.enabled ? widget.hint! : widget.disabledHint ?? widget.hint!;
-      hintWidget = IgnorePointer(child: hintWidget);
-      child = DefaultTextStyle(
-        style: _textStyle!.copyWith(color: Theme.of(context).hintColor),
-        child: hintWidget,
-      );
+    final decoration = effectiveDecoration;
+    if (selectedIndexes.isEmpty && (widget.hint != null || widget.disabled && widget.disabledHint != null || decoration.hintText != null)) {
+      child = _buildHintWidget(context, decoration);
     } else {
       child = widget.childBuilder(context, widget.items, selectedIndexes);
     }
@@ -1505,34 +1467,25 @@ class DropdownFieldState<T> extends State<DropdownField<T>> with WidgetsBindingO
       }
     }
 
-    // child = IndexedStack(
-    //   index: selectedIndexes.isEmpty ? items.length - 1 : 0,
-    //   alignment: widget.alignment,
-    //   children: items,
-    // );
-
-    if (widget.isExpanded) child = Expanded(child: child);
-
-    Widget result = DefaultTextStyle(
-      style: _textStyle!,
+    child = DefaultTextStyle(
+      style: _textStyle,
       child: Container(
         padding: widget.buttonPadding.resolve(Directionality.of(context)),
         height: widget.isDense ? _denseButtonHeight : null,
-        decoration: widget.decoration,
-        child: IconTheme(
-          data: IconThemeData(color: _iconColor, size: widget.iconSize),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            mainAxisSize: MainAxisSize.max,
-            children: <Widget>[
-              if (widget.leading != null) widget.leading!,
-              child,
-              if (widget.trailing != null) widget.trailing!,
-            ],
-          ),
-        ),
+        child: child,
       ),
     );
+
+    child = InputDecorator(
+      decoration: decoration,
+      isEmpty: widget._isEmpty,
+      isFocused: widget._isFocused,
+      child: child,
+    );
+
+    if (widget.padding != null) {
+      child = Padding(padding: widget.padding!, child: child);
+    }
 
     final MouseCursor effectiveMouseCursor = WidgetStateProperty.resolveAs<MouseCursor>(
       WidgetStateMouseCursor.clickable,
@@ -1540,15 +1493,6 @@ class DropdownFieldState<T> extends State<DropdownField<T>> with WidgetsBindingO
         if (!widget.enabled) WidgetState.disabled,
       },
     );
-
-    if (widget._inputDecoration != null) {
-      result = InputDecorator(
-        decoration: widget._inputDecoration!,
-        isEmpty: widget._isEmpty,
-        isFocused: widget._isFocused,
-        child: result,
-      );
-    }
 
     return Semantics(
       button: true,
@@ -1563,10 +1507,55 @@ class DropdownFieldState<T> extends State<DropdownField<T>> with WidgetsBindingO
           autofocus: widget.autofocus,
           focusColor: widget.focusColor ?? Theme.of(context).focusColor,
           enableFeedback: false,
-          child: widget.padding == null ? result : Padding(padding: widget.padding!, child: result),
+          child: child,
         ),
       ),
     );
+  }
+  
+  Widget _buildHintWidget(BuildContext context, InputDecoration decoration) {
+    Widget enableHint = widget.hint ?? Text(decoration.hintText!);
+
+    var hintWidget = widget.enabled ? enableHint : widget.disabledHint ?? enableHint;
+
+    if (decoration.hintTextDirection != null) {
+      hintWidget = Directionality(
+        textDirection: decoration.hintTextDirection!,
+        child: hintWidget,
+      );
+    }
+
+    hintWidget = DefaultTextStyle(
+      style: decoration.hintStyle ?? _textStyle.copyWith(color: Theme.of(context).hintColor),
+      maxLines: decoration.hintMaxLines,
+      child: hintWidget,
+    );
+
+    if (decoration.hintFadeDuration != null) {
+      var opacity = 1.0;
+      // TODO: not completed
+      // WidgetsBinding.instance.addPostFrameCallback((_) => setState(() => opacity = 0));
+      hintWidget = AnimatedOpacity(
+        opacity: opacity,
+        duration: decoration.hintFadeDuration!,
+        child: hintWidget,
+      );
+    }
+
+    return IgnorePointer(child: hintWidget);
+  }
+
+  InputDecoration get effectiveDecoration {
+    var result = widget.decoration ?? const InputDecoration();
+    if (result.suffix == null && result.suffixIcon == null && result.suffixText == null) {
+      result = result
+          .applyDefaults(Theme.of(context).inputDecorationTheme)
+          .copyWith(
+        suffixIcon: const Icon(Icons.arrow_drop_down),
+        suffixIconColor: _iconColor,
+      );
+    }
+    return result;
   }
 }
 
@@ -1606,10 +1595,8 @@ class DropdownFormField<T> extends FormField<Iterable<int>> {
     VoidCallback? onTap,
     int elevation = 8,
     TextStyle? style,
-    Widget? icon,
     Color? disabledColor,
     Color? enabledColor,
-    double iconSize = 24.0,
     bool isDense = true,
     bool isExpanded = false,
     double? itemHeight,
@@ -1699,10 +1686,8 @@ class DropdownFormField<T> extends FormField<Iterable<int>> {
                     onTap: onTap,
                     elevation: elevation,
                     style: style,
-                    leading: icon,
                     disabledColor: disabledColor,
                     enabledColor: enabledColor,
-                    iconSize: iconSize,
                     isDense: isDense,
                     isExpanded: isExpanded,
                     itemHeight: itemHeight,
@@ -1714,7 +1699,7 @@ class DropdownFormField<T> extends FormField<Iterable<int>> {
                     enableFeedback: enableFeedback,
                     alignment: alignment,
                     borderRadius: borderRadius ?? effectiveBorderRadius(),
-                    inputDecoration: effectiveDecoration.copyWith(errorText: field.errorText),
+                    decoration: effectiveDecoration.copyWith(errorText: field.errorText),
                     isEmpty: isEmpty,
                     isFocused: isFocused,
                     padding: padding,

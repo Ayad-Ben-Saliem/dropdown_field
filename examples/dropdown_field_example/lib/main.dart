@@ -299,11 +299,19 @@ class _UsersFieldState extends State<UsersField> {
       items: [usersView],
       initialSelected: [if (selected.isNotEmpty) 0],
       hint: const Text('Selected Users'),
-      trailing: Row(
-        children: [
-          IconButton(onPressed: () {}, icon: const Icon(Icons.add)),
-          const Icon(Icons.arrow_drop_down),
-        ],
+      decoration: InputDecoration(
+        labelText: 'Label Test',
+        hintText: 'Hint',
+        hintFadeDuration: Duration(seconds: 5),
+        contentPadding: EdgeInsets.zero,
+        border: const OutlineInputBorder(),
+        suffixIcon: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            IconButton(onPressed: () {}, icon: const Icon(Icons.add)),
+            const Icon(Icons.arrow_drop_down),
+          ],
+        ),
       ),
       isExpanded: true,
       childBuilder: (context, _, __) {
