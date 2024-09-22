@@ -21,7 +21,7 @@ const BoxConstraints kMenuItemConstraints = BoxConstraints(minHeight: kDenseButt
 /// Used by [DropdownField.selectedItemBuilder].
 typedef DropdownFieldBuilder = List<Widget> Function(BuildContext context);
 
-typedef DropdownChildBuilder<T> = Widget Function(BuildContext context, Iterable<T> items, Iterable<int> selected);
+typedef DropdownChildBuilder<T> = Widget? Function(BuildContext context, Iterable<T> items, Iterable<int> selected);
 
 typedef DropdownItemBuilder<T> = Widget Function(BuildContext context, T item, int index, bool isSelected);
 
@@ -1450,11 +1450,12 @@ class DropdownFieldState<T> extends State<DropdownField<T>> with WidgetsBindingO
   
   Widget _buildChild(BuildContext context) {
     Widget child;
+
     final decoration = effectiveDecoration;
-    if (selectedIndexes.isEmpty && (widget.hint != null || widget.disabled && widget.disabledHint != null || decoration.hintText != null)) {
-      child = _buildHintWidget(context, decoration);
+    if (widget.hint != null || widget.disabled && widget.disabledHint != null || decoration.hintText != null) {
+      child = widget.childBuilder(context, widget.items, selectedIndexes) ??_buildHintWidget(context, decoration);
     } else {
-      child = widget.childBuilder(context, widget.items, selectedIndexes);
+      child = widget.childBuilder(context, widget.items, selectedIndexes) ?? Container();
     }
 
     child = DropdownMenuItemContainer(alignment: widget.alignment, child: child);

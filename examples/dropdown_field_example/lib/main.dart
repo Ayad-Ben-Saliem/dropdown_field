@@ -302,7 +302,7 @@ class _UsersFieldState extends State<UsersField> {
       decoration: InputDecoration(
         labelText: 'Label Test',
         hintText: 'Hint',
-        hintFadeDuration: Duration(seconds: 5),
+        hintFadeDuration: const Duration(seconds: 5),
         contentPadding: EdgeInsets.zero,
         border: const OutlineInputBorder(),
         suffixIcon: Row(

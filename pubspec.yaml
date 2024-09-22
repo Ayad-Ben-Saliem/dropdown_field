@@ -1,6 +1,6 @@
 name: dropdown_field
 description: "Beautiful dropdown field widget"
-version: 0.3.0
+version: 0.3.1
 homepage: https://github.com/Ayad-Ben-Saliem/dropdown_field
 
 environment:
