@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import 'package:manassa_dropdown_field/dropdown_field.dart';
+import 'package:manassa_dropdown_field/manassa_dropdown_field.dart';
 
 void main() {
   // testWidgets('DropdownField test', (WidgetTester tester) async {
