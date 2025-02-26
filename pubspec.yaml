@@ -1,7 +1,7 @@
-name: dropdown_field
+name: manassa_dropdown_field
 description: "Beautiful dropdown field widget"
 version: 0.3.1
-homepage: https://github.com/Ayad-Ben-Saliem/dropdown_field
+homepage: https://github.com/Ayad-Ben-Saliem/manassa_dropdown_field
 
 environment:
   sdk: '>=3.3.3 <4.0.0'

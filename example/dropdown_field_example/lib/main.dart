@@ -1,5 +1,5 @@
-import 'package:dropdown_field/dropdown_field.dart';
-import 'package:dropdown_field_example/user_model.dart';
+import 'package:manassa_dropdown_field/dropdown_field.dart';
+import 'user_model.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart' hide DropdownMenuItem;
 

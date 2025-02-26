@@ -1,9 +1,9 @@
-# dropdown_field
+# manassa_dropdown_field
 A Flutter package providing a highly customizable dropdown field with **multi-select** functionality, search/filtering, and custom item builders.
 
 
 ## Description
-The `dropdown_field` package offers a flexible and powerful way to create dropdown fields in your Flutter applications.  Unlike the standard Flutter dropdown widgets, this package allows for:
+The `manassa_dropdown_field` package offers a flexible and powerful way to create dropdown fields in your Flutter applications.  Unlike the standard Flutter dropdown widgets, this package allows for:
 
 * **Multi-selection:**  Select multiple items from the dropdown list.
 * **Customizable Styling:** Control the appearance of the dropdown, including colors, fonts, borders, and item shapes.
@@ -85,4 +85,4 @@ DropdownField<String>(
 )
 ```
 
-![Multi Select Programming Languages](assets/dropdown_field.gif)
+![Multi Select Programming Languages](assets/manassa_dropdown_field.gif)
