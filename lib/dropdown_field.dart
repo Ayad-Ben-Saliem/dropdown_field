@@ -25,6 +25,9 @@ typedef DropdownChildBuilder<T> = Widget? Function(BuildContext context, Iterabl
 
 typedef DropdownItemBuilder<T> = Widget Function(BuildContext context, T item, int index, bool isSelected);
 
+//Add onTap Callback function which will return the index of the item selected
+typedef OnTapCallback = void Function(int index);
+
 class DropdownMenuPainter extends CustomPainter {
   DropdownMenuPainter({
     this.color,
@@ -130,7 +133,7 @@ class DropdownMenuItemButtonState<T> extends State<DropdownMenuItemButton<T>> {
   void _handleOnTap() {
     final DropdownMenuItem<T> dropdownMenuItem = widget.route.items[widget.itemIndex].item!;
 
-    dropdownMenuItem.onTap?.call();
+    dropdownMenuItem.onTap?.call(widget.itemIndex);
 
     Navigator.pop(context, DropdownRouteResult<T>(dropdownMenuItem.index, dropdownMenuItem.value));
   }
@@ -782,7 +785,7 @@ class DropdownMenuItem<T> extends DropdownMenuItemContainer {
   });
 
   /// Called when the dropdown menu item is tapped.
-  final VoidCallback? onTap;
+  final OnTapCallback? onTap;
 
   /// The value to return if the user selects this menu item.
   ///
@@ -1051,7 +1054,7 @@ class DropdownField<T> extends StatefulWidget {
   /// selects an item from the dropdown.
   ///
   /// The callback will not be invoked if the dropdown button is disabled.
-  final VoidCallback? onTap;
+  final OnTapCallback? onTap;
 
   final EdgeInsetsDirectional buttonPadding;
 
@@ -1388,9 +1391,10 @@ class DropdownFieldState<T> extends State<DropdownField<T>> with WidgetsBindingO
       } else {
         widget.onChanged?.call([newValue.index]);
       }
+          widget.onTap?.call(newValue.index);
+
     });
 
-    widget.onTap?.call();
   }
 
   // When isDense is true, reduce the height of this button from _kMenuItemHeight to
@@ -1593,7 +1597,7 @@ class DropdownFormField<T> extends FormField<Iterable<int>> {
     Widget? hint,
     Widget? disabledHint,
     required this.onChanged,
-    VoidCallback? onTap,
+    OnTapCallback? onTap,
     int elevation = 8,
     TextStyle? style,
     Color? disabledColor,
