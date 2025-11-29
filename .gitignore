@@ -27,3 +27,15 @@ migrate_working_dir/
 **/doc/api/
 .dart_tool/
 build/
+
+
+
+example/dropdown_field_example/pubspec.lock
+example/dropdown_field_example/.metadata
+
+example/dropdown_field_example/android
+example/dropdown_field_example/ios
+example/dropdown_field_example/windows
+example/dropdown_field_example/linux
+example/dropdown_field_example/macos
+example/dropdown_field_example/web
