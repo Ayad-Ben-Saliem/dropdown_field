@@ -27,18 +27,44 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('DropdownField Example'), centerTitle: true),
-      body: const Row(
+      appBar:
+          AppBar(title: const Text('DropdownField Example'), centerTitle: true),
+      body: Row(
         children: [
-          Expanded(child: UsersView(users: users)),
-          VerticalDivider(),
+          const Expanded(child: UsersView(users: users)),
+          const VerticalDivider(),
           Expanded(
-            child: Align(
-              alignment: Alignment.topCenter,
-              child: Padding(
-                padding: EdgeInsets.all(100),
-                child: UsersField(users: users, multiselect: true),
-              ),
+            child: Column(
+              children: [
+                const Padding(
+                  padding: EdgeInsets.all(100),
+                  child: UsersField(users: users, multiselect: true),
+                ),
+
+                // Empty drop down field
+                DropdownField(
+                  items: const ["1", "2", "3"],
+                  menuBuilder: (context, items) {
+                    if (items.isEmpty) {
+                      return const SizedBox(
+                        height: 100,
+                        child: Card(
+                          elevation: 8,
+                          child: Center(
+                            child: Padding(
+                              padding: EdgeInsets.all(16),
+                              child: Text('No items available'),
+                            ),
+                          ),
+                        ),
+                      );
+                    }
+
+                    return null;
+                  },
+                  onChanged: (values) {},
+                ),
+              ],
             ),
           ),
         ],
@@ -107,7 +133,9 @@ class _UsersViewState extends State<UsersView> {
                 items: ViewType.values,
                 hint: const Text('View Type'),
                 childBuilder: (_, views, selected) {
-                  final view = selected.isNotEmpty ? views.elementAt(selected.first) : null;
+                  final view = selected.isNotEmpty
+                      ? views.elementAt(selected.first)
+                      : null;
                   return Text(view?.readableStr ?? '');
                 },
                 itemBuilder: (_, view, index, selected) {
@@ -123,7 +151,9 @@ class _UsersViewState extends State<UsersView> {
                 },
               ),
             ),
-            Flexible(child: SearchBar(onChanged: (txt) => setState(() => searchText = txt))),
+            Flexible(
+                child: SearchBar(
+                    onChanged: (txt) => setState(() => searchText = txt))),
           ],
         ),
         const SizedBox(height: 24),
@@ -216,7 +246,10 @@ class _UsersViewState extends State<UsersView> {
             Card(
               color: selected.contains(user) ? colorScheme.primary : null,
               child: DefaultTextStyle(
-                style: TextStyle(color: selected.contains(user) ? colorScheme.onPrimary : colorScheme.onSurface),
+                style: TextStyle(
+                    color: selected.contains(user)
+                        ? colorScheme.onPrimary
+                        : colorScheme.onSurface),
                 child: InkWell(
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.spaceAround,

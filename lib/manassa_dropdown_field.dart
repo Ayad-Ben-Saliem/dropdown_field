@@ -14,19 +14,25 @@ const double kFieldHeight = kMinInteractiveDimension;
 const double kMenuItemHeight = kMinInteractiveDimension;
 const double kDenseButtonHeight = 24.0;
 const double kMenuItemMinHeight = kDenseButtonHeight;
-const BoxConstraints kMenuItemConstraints = BoxConstraints(minHeight: kDenseButtonHeight);
+const BoxConstraints kMenuItemConstraints =
+    BoxConstraints(minHeight: kDenseButtonHeight);
 
 /// A builder to customize dropdown buttons.
 ///
 /// Used by [DropdownField.selectedItemBuilder].
 typedef DropdownFieldBuilder = List<Widget> Function(BuildContext context);
 
-typedef DropdownChildBuilder<T> = Widget? Function(BuildContext context, Iterable<T> items, Iterable<int> selected);
+typedef DropdownChildBuilder<T> = Widget? Function(
+    BuildContext context, Iterable<T> items, Iterable<int> selected);
 
-typedef DropdownItemBuilder<T> = Widget Function(BuildContext context, T item, int index, bool isSelected);
+typedef DropdownItemBuilder<T> = Widget Function(
+    BuildContext context, T item, int index, bool isSelected);
 
 //Add onTap Callback function which will return the index of the item selected
 typedef OnTapCallback = void Function(int index);
+
+typedef DropdownMenuBuilder<T> = Widget? Function(
+    BuildContext context, List<T> items);
 
 class DropdownMenuPainter extends CustomPainter {
   DropdownMenuPainter({
@@ -41,7 +47,8 @@ class DropdownMenuPainter extends CustomPainter {
           // configuration in the paint() function and you must provide some sort
           // of onChanged callback here.
           color: color,
-          borderRadius: borderRadius ?? const BorderRadius.all(Radius.circular(2.0)),
+          borderRadius:
+              borderRadius ?? const BorderRadius.all(Radius.circular(2.0)),
           boxShadow: kElevationToShadow[elevation],
         ).createBoxPainter(),
         super(repaint: resize);
@@ -59,16 +66,19 @@ class DropdownMenuPainter extends CustomPainter {
     final selectedItemsOffset = getSelectedItemsOffset();
     for (final selectedItemOffset in selectedItemsOffset) {
       final top = Tween<double>(
-        begin: clampDouble(selectedItemOffset, 0.0, math.max(size.height - kMenuItemHeight, 0.0)),
+        begin: clampDouble(selectedItemOffset, 0.0,
+            math.max(size.height - kMenuItemHeight, 0.0)),
         end: 0.0,
       );
 
       final Tween<double> bottom = Tween<double>(
-        begin: clampDouble(top.begin! + kMenuItemHeight, math.min(kMenuItemHeight, size.height), size.height),
+        begin: clampDouble(top.begin! + kMenuItemHeight,
+            math.min(kMenuItemHeight, size.height), size.height),
         end: size.height,
       );
 
-      final Rect rect = Rect.fromLTRB(0.0, top.evaluate(resize), size.width, bottom.evaluate(resize));
+      final Rect rect = Rect.fromLTRB(
+          0.0, top.evaluate(resize), size.width, bottom.evaluate(resize));
 
       _painter.paint(canvas, rect.topLeft, ImageConfiguration(size: rect.size));
     }
@@ -76,7 +86,11 @@ class DropdownMenuPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(DropdownMenuPainter oldDelegate) {
-    return oldDelegate.color != color || oldDelegate.elevation != elevation || oldDelegate.selectedIndex != selectedIndex || oldDelegate.borderRadius != borderRadius || oldDelegate.resize != resize;
+    return oldDelegate.color != color ||
+        oldDelegate.elevation != elevation ||
+        oldDelegate.selectedIndex != selectedIndex ||
+        oldDelegate.borderRadius != borderRadius ||
+        oldDelegate.resize != resize;
   }
 }
 
@@ -106,12 +120,14 @@ class DropdownMenuItemButton<T> extends StatefulWidget {
   final bool enableFeedback;
 
   @override
-  DropdownMenuItemButtonState<T> createState() => DropdownMenuItemButtonState<T>();
+  DropdownMenuItemButtonState<T> createState() =>
+      DropdownMenuItemButtonState<T>();
 }
 
 class DropdownMenuItemButtonState<T> extends State<DropdownMenuItemButton<T>> {
   void _handleFocusChange(bool focused) {
-    final bool inTraditionalMode = switch (FocusManager.instance.highlightMode) {
+    final bool inTraditionalMode =
+        switch (FocusManager.instance.highlightMode) {
       FocusHighlightMode.touch => false,
       FocusHighlightMode.traditional => true,
     };
@@ -131,38 +147,49 @@ class DropdownMenuItemButtonState<T> extends State<DropdownMenuItemButton<T>> {
   }
 
   void _handleOnTap() {
-    final DropdownMenuItem<T> dropdownMenuItem = widget.route.items[widget.itemIndex].item!;
+    final DropdownMenuItem<T> dropdownMenuItem =
+        widget.route.items[widget.itemIndex].item!;
 
     dropdownMenuItem.onTap?.call(widget.itemIndex);
 
-    Navigator.pop(context, DropdownRouteResult<T>(dropdownMenuItem.index, dropdownMenuItem.value));
+    Navigator.pop(context,
+        DropdownRouteResult<T>(dropdownMenuItem.index, dropdownMenuItem.value));
   }
 
-  static const Map<ShortcutActivator, Intent> _webShortcuts = <ShortcutActivator, Intent>{
+  static const Map<ShortcutActivator, Intent> _webShortcuts =
+      <ShortcutActivator, Intent>{
     // On the web, up/down don't change focus, *except* in a <select>
     // element, which is what a dropdown emulates.
-    SingleActivator(LogicalKeyboardKey.arrowDown): DirectionalFocusIntent(TraversalDirection.down),
-    SingleActivator(LogicalKeyboardKey.arrowUp): DirectionalFocusIntent(TraversalDirection.up),
+    SingleActivator(LogicalKeyboardKey.arrowDown):
+        DirectionalFocusIntent(TraversalDirection.down),
+    SingleActivator(LogicalKeyboardKey.arrowUp):
+        DirectionalFocusIntent(TraversalDirection.up),
   };
 
   @override
   Widget build(BuildContext context) {
-    final DropdownMenuItem<T> dropdownMenuItem = widget.route.items[widget.itemIndex].item!;
+    final DropdownMenuItem<T> dropdownMenuItem =
+        widget.route.items[widget.itemIndex].item!;
     final CurvedAnimation opacity;
     final double unit = 0.5 / (widget.route.items.length + 1.5);
     if (widget.route.selectedIndexes.contains(widget.itemIndex)) {
-      opacity = CurvedAnimation(parent: widget.route.animation!, curve: const Threshold(0.0));
+      opacity = CurvedAnimation(
+          parent: widget.route.animation!, curve: const Threshold(0.0));
     } else {
-      final double start = clampDouble(0.5 + (widget.itemIndex + 1) * unit, 0.0, 1.0);
+      final double start =
+          clampDouble(0.5 + (widget.itemIndex + 1) * unit, 0.0, 1.0);
       final double end = clampDouble(start + 1.5 * unit, 0.0, 1.0);
-      opacity = CurvedAnimation(parent: widget.route.animation!, curve: Interval(start, end));
+      opacity = CurvedAnimation(
+          parent: widget.route.animation!, curve: Interval(start, end));
     }
 
     Widget child = widget.route.items[widget.itemIndex];
 
-    child = Container(padding: widget.padding, height: widget.route.itemHeight, child: child);
+    child = Container(
+        padding: widget.padding, height: widget.route.itemHeight, child: child);
 
-    child = ConstrainedBox(constraints: widget.route.itemConstraints, child: child);
+    child =
+        ConstrainedBox(constraints: widget.route.itemConstraints, child: child);
 
     // An [InkWell] is added to the item only if it is enabled
     if (dropdownMenuItem.enabled) {
@@ -248,7 +275,8 @@ class DropdownMenuState<T> extends State<DropdownMenu<T>> {
     // When the menu is dismissed we just fade the entire thing out
     // in the first 0.25s.
     assert(debugCheckHasMaterialLocalizations(context));
-    final MaterialLocalizations localizations = MaterialLocalizations.of(context);
+    final MaterialLocalizations localizations =
+        MaterialLocalizations.of(context);
     final DropdownRoute<T> route = widget.route;
     final List<Widget> children = <Widget>[
       for (int itemIndex = 0; itemIndex < route.items.length; ++itemIndex)
@@ -276,7 +304,8 @@ class DropdownMenuState<T> extends State<DropdownMenu<T>> {
           borderRadius: widget.borderRadius,
           // This offset is passed as a callback, not a value, because it must
           // be retrieved at paint time (after layout), not at build time.
-          getSelectedItemsOffset: () => route.getItemsOffset(route.selectedIndexes),
+          getSelectedItemsOffset: () =>
+              route.getItemsOffset(route.selectedIndexes),
         ),
         child: Semantics(
           scopesRoute: true,
@@ -285,7 +314,8 @@ class DropdownMenuState<T> extends State<DropdownMenu<T>> {
           label: localizations.popupMenuLabel,
           child: ClipRRect(
             borderRadius: widget.borderRadius ?? BorderRadius.zero,
-            clipBehavior: widget.borderRadius != null ? Clip.antiAlias : Clip.none,
+            clipBehavior:
+                widget.borderRadius != null ? Clip.antiAlias : Clip.none,
             child: Material(
               type: MaterialType.transparency,
               textStyle: route.style,
@@ -338,7 +368,8 @@ class DropdownMenuRouteLayout<T> extends SingleChildLayoutDelegate {
     // the view height. This ensures a tappable area outside of the simple menu
     // with which to dismiss the menu.
     //   -- https://material.io/design/components/menus.html#usage
-    double maxHeight = math.max(0.0, constraints.maxHeight - 2 * kMenuItemHeight);
+    double maxHeight =
+        math.max(0.0, constraints.maxHeight - 2 * kMenuItemHeight);
     if (route.menuMaxHeight != null && route.menuMaxHeight! <= maxHeight) {
       maxHeight = route.menuMaxHeight!;
     }
@@ -357,7 +388,8 @@ class DropdownMenuRouteLayout<T> extends SingleChildLayoutDelegate {
   Offset getPositionForChild(Size size, Size childSize) {
     final selectedIndexes = List<int>.from(route.selectedIndexes);
     if (selectedIndexes.isEmpty) selectedIndexes.add(0);
-    final menuLimits = route.getMenuLimits(buttonRect, size.height, selectedIndexes);
+    final menuLimits =
+        route.getMenuLimits(buttonRect, size.height, selectedIndexes);
 
     // Get the smallest top
     var menuLimit = menuLimits.first;
@@ -379,8 +411,10 @@ class DropdownMenuRouteLayout<T> extends SingleChildLayoutDelegate {
 
     assert(textDirection != null);
     final left = switch (textDirection!) {
-      TextDirection.rtl => clampDouble(buttonRect.right, 0.0, size.width) - childSize.width,
-      TextDirection.ltr => clampDouble(buttonRect.left, 0.0, size.width - childSize.width),
+      TextDirection.rtl =>
+        clampDouble(buttonRect.right, 0.0, size.width) - childSize.width,
+      TextDirection.ltr =>
+        clampDouble(buttonRect.left, 0.0, size.width - childSize.width),
     };
 
     return Offset(left, menuLimit.top);
@@ -388,7 +422,8 @@ class DropdownMenuRouteLayout<T> extends SingleChildLayoutDelegate {
 
   @override
   bool shouldRelayout(DropdownMenuRouteLayout<T> oldDelegate) {
-    return buttonRect != oldDelegate.buttonRect || textDirection != oldDelegate.textDirection;
+    return buttonRect != oldDelegate.buttonRect ||
+        textDirection != oldDelegate.textDirection;
   }
 }
 
@@ -404,7 +439,9 @@ class DropdownRouteResult<T> {
 
   @override
   bool operator ==(Object other) {
-    return other is DropdownRouteResult<T> && value == other.value && index == other.index;
+    return other is DropdownRouteResult<T> &&
+        value == other.value &&
+        index == other.index;
   }
 
   @override
@@ -423,6 +460,8 @@ class MenuLimit {
 class DropdownRoute<T> extends PopupRoute<DropdownRouteResult<T>> {
   DropdownRoute({
     required this.items,
+    required this.originalItems,
+    this.menuBuilder,
     required this.padding,
     required this.buttonRect,
     required this.selectedIndexes,
@@ -439,9 +478,12 @@ class DropdownRoute<T> extends PopupRoute<DropdownRouteResult<T>> {
     this.menuMaxHeight,
     required this.enableFeedback,
     this.borderRadius,
-  }) : itemHeights = List<double>.filled(items.length, itemHeight ?? kMenuItemHeight);
+  }) : itemHeights =
+            List<double>.filled(items.length, itemHeight ?? kMenuItemHeight);
 
   final List<MenuItem<T>> items;
+  final List<T> originalItems;
+  final DropdownMenuBuilder<T>? menuBuilder;
   final EdgeInsetsGeometry padding;
   final Rect buttonRect;
   final Iterable<int> selectedIndexes;
@@ -473,7 +515,8 @@ class DropdownRoute<T> extends PopupRoute<DropdownRouteResult<T>> {
   final String? barrierLabel;
 
   @override
-  Widget buildPage(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation) {
+  Widget buildPage(BuildContext context, Animation<double> animation,
+      Animation<double> secondaryAnimation) {
     return LayoutBuilder(
       builder: (BuildContext context, BoxConstraints constraints) {
         return DropdownRoutePage<T>(
@@ -510,13 +553,19 @@ class DropdownRoute<T> extends PopupRoute<DropdownRouteResult<T>> {
     double offset = kMaterialListPadding.top;
     if (items.isNotEmpty && index > 0) {
       assert(items.length == itemHeights.length);
-      offset += itemHeights.sublist(0, index).reduce((double total, double height) => total + height);
+      offset += itemHeights
+          .sublist(0, index)
+          .reduce((double total, double height) => total + height);
     }
     return offset;
   }
 
-  Iterable<MenuLimit> getMenuLimits(Rect buttonRect, double availableHeight, Iterable<int> indexes) {
-    return [for (final index in indexes) getMenuLimit(buttonRect, availableHeight, index)];
+  Iterable<MenuLimit> getMenuLimits(
+      Rect buttonRect, double availableHeight, Iterable<int> indexes) {
+    return [
+      for (final index in indexes)
+        getMenuLimit(buttonRect, availableHeight, index)
+    ];
   }
 
   // Returns the vertical extent of the menu and the initial scrollOffset
@@ -537,12 +586,20 @@ class DropdownRoute<T> extends PopupRoute<DropdownRouteResult<T>> {
     // In this case, we want to change the menu limits to align with the top
     // or bottom edge of the button.
     final double topLimit = math.min(kMenuItemHeight, buttonTop);
-    final double bottomLimit = math.max(availableHeight - kMenuItemHeight, buttonBottom);
+    final double bottomLimit =
+        math.max(availableHeight - kMenuItemHeight, buttonBottom);
 
-    double menuTop = (buttonTop - itemOffset) - (itemHeights[index] - buttonRect.height) / 2.0;
+    final double selectedItemHeight =
+        items.isEmpty ? buttonRect.height : itemHeights[index];
+
+    double menuTop = (buttonTop - itemOffset) -
+        (selectedItemHeight - buttonRect.height) / 2.0;
     double preferredMenuHeight = kMaterialListPadding.vertical;
     if (items.isNotEmpty) {
-      preferredMenuHeight += itemHeights.reduce((double total, double height) => total + height);
+      preferredMenuHeight +=
+          itemHeights.reduce((double total, double height) => total + height);
+    } else {
+      preferredMenuHeight += kMenuItemHeight;
     }
 
     // If there are too many elements in the menu, we need to shrink it down
@@ -565,8 +622,10 @@ class DropdownRoute<T> extends PopupRoute<DropdownRouteResult<T>> {
       menuTop = menuBottom - menuHeight;
     }
 
-    if (menuBottom - itemHeights[index] / 2.0 < buttonBottom - buttonRect.height / 2.0) {
-      menuBottom = buttonBottom - buttonRect.height / 2.0 + itemHeights[index] / 2.0;
+    if (menuBottom - selectedItemHeight / 2.0 <
+        buttonBottom - buttonRect.height / 2.0) {
+      menuBottom =
+          buttonBottom - buttonRect.height / 2.0 + selectedItemHeight / 2.0;
       menuTop = menuBottom - menuHeight;
     }
 
@@ -642,8 +701,11 @@ class DropdownRoutePageState<T> extends State<DropdownRoutePage<T>> {
     // and all of the items' intrinsic heights are less than kMinInteractiveDimension.
     // Otherwise the initialScrollOffset is just a rough approximation based on
     // treating the items as if their heights were all equal to kMinInteractiveDimension.
-    final menuLimits = widget.route.getMenuLimits(widget.buttonRect, widget.constraints.maxHeight, widget.selectedIndexes);
-    if (menuLimits.isNotEmpty) _scrollController = ScrollController(initialScrollOffset: menuLimits.first.scrollOffset);
+    final menuLimits = widget.route.getMenuLimits(widget.buttonRect,
+        widget.constraints.maxHeight, widget.selectedIndexes);
+    if (menuLimits.isNotEmpty)
+      _scrollController =
+          ScrollController(initialScrollOffset: menuLimits.first.scrollOffset);
   }
 
   @override
@@ -651,18 +713,21 @@ class DropdownRoutePageState<T> extends State<DropdownRoutePage<T>> {
     assert(debugCheckHasDirectionality(context));
 
     final TextDirection? textDirection = Directionality.maybeOf(context);
-    final Widget menu = DropdownMenu<T>(
-      route: widget.route,
-      padding: widget.padding.resolve(textDirection),
-      buttonRect: widget.buttonRect,
-      constraints: widget.constraints,
-      dropdownColor: widget.dropdownColor,
-      itemsFocusColor: widget.menuItemsFocusColor,
-      itemsHoverColor: widget.menuItemsHoverColor,
-      enableFeedback: widget.enableFeedback,
-      borderRadius: widget.borderRadius,
-      scrollController: _scrollController,
-    );
+    final Widget? customMenu =
+        widget.route.menuBuilder?.call(context, widget.route.originalItems);
+    final Widget menu = customMenu ??
+        DropdownMenu<T>(
+          route: widget.route,
+          padding: widget.padding.resolve(textDirection),
+          buttonRect: widget.buttonRect,
+          constraints: widget.constraints,
+          dropdownColor: widget.dropdownColor,
+          itemsFocusColor: widget.menuItemsFocusColor,
+          itemsHoverColor: widget.menuItemsHoverColor,
+          enableFeedback: widget.enableFeedback,
+          borderRadius: widget.borderRadius,
+          scrollController: _scrollController,
+        );
 
     return MediaQuery.removePadding(
       context: context,
@@ -709,7 +774,8 @@ class MenuItem<T> extends SingleChildRenderObjectWidget {
   }
 
   @override
-  void updateRenderObject(BuildContext context, covariant RenderMenuItem renderObject) {
+  void updateRenderObject(
+      BuildContext context, covariant RenderMenuItem renderObject) {
     renderObject.onLayout = onLayout;
   }
 }
@@ -911,8 +977,9 @@ class DropdownField<T> extends StatefulWidget {
   const DropdownField({
     super.key,
     required this.items,
-    required this.childBuilder,
-    required this.itemBuilder,
+    this.childBuilder,
+    this.itemBuilder,
+    this.menuBuilder,
     this.refreshable = true,
     this.refreshDropdownMenuItemsOnChange = false,
     this.initialSelected = const [],
@@ -938,6 +1005,7 @@ class DropdownField<T> extends StatefulWidget {
     this.dropdownColor,
     this.dropdownMenuItemsFocusColor,
     this.dropdownMenuItemsHoverColor,
+    this.selectedColor,
     this.menuMinHeight = kMenuItemMinHeight,
     this.menuMaxHeight,
     this.multiselect = true,
@@ -955,8 +1023,9 @@ class DropdownField<T> extends StatefulWidget {
   const DropdownField._formField({
     super.key,
     required this.items,
-    required this.childBuilder,
-    required this.itemBuilder,
+    this.childBuilder,
+    this.itemBuilder,
+    this.menuBuilder,
     this.refreshable = true,
     this.refreshDropdownMenuItemsOnChange = false,
     this.initialSelected = const [],
@@ -981,6 +1050,7 @@ class DropdownField<T> extends StatefulWidget {
     this.dropdownColor,
     this.dropdownMenuItemsFocusColor,
     this.dropdownMenuItemsHoverColor,
+    this.selectedColor,
     this.menuMinHeight = kMenuItemMinHeight,
     this.menuMaxHeight,
     this.multiselect = true,
@@ -1013,9 +1083,11 @@ class DropdownField<T> extends StatefulWidget {
   /// if it is non-null.
   final Iterable<int> initialSelected;
 
-  final DropdownChildBuilder<T> childBuilder;
+  final DropdownChildBuilder<T>? childBuilder;
 
-  final DropdownItemBuilder<T> itemBuilder;
+  final DropdownItemBuilder<T>? itemBuilder;
+
+  final DropdownMenuBuilder<T>? menuBuilder;
 
   final bool refreshable;
 
@@ -1152,6 +1224,8 @@ class DropdownField<T> extends StatefulWidget {
 
   final Color? dropdownMenuItemsHoverColor;
 
+  final Color? selectedColor;
+
   /// Padding around the visible portion of the dropdown widget.
   ///
   /// As the padding increases, the size of the [DropdownField] will also
@@ -1221,7 +1295,8 @@ class DropdownField<T> extends StatefulWidget {
   State<DropdownField<T>> createState() => DropdownFieldState<T>();
 }
 
-class DropdownFieldState<T> extends State<DropdownField<T>> with WidgetsBindingObserver {
+class DropdownFieldState<T> extends State<DropdownField<T>>
+    with WidgetsBindingObserver {
   final selectedIndexes = <int>[];
   var dropdownMenuItems = <DropdownMenuItem<T>>[];
   DropdownRoute<T>? _dropdownRoute;
@@ -1248,8 +1323,10 @@ class DropdownFieldState<T> extends State<DropdownField<T>> with WidgetsBindingO
       _internalNode ??= _createFocusNode();
     }
     _actionMap = <Type, Action<Intent>>{
-      ActivateIntent: CallbackAction<ActivateIntent>(onInvoke: (_) => _handleTap()),
-      ButtonActivateIntent: CallbackAction<ButtonActivateIntent>(onInvoke: (_) => _handleTap()),
+      ActivateIntent:
+          CallbackAction<ActivateIntent>(onInvoke: (_) => _handleTap()),
+      ButtonActivateIntent:
+          CallbackAction<ButtonActivateIntent>(onInvoke: (_) => _handleTap()),
     };
   }
 
@@ -1259,7 +1336,21 @@ class DropdownFieldState<T> extends State<DropdownField<T>> with WidgetsBindingO
         DropdownMenuItem(
           index: index,
           value: widget.items.elementAt(index),
-          child: widget.itemBuilder(context, widget.items.elementAt(index), index, selectedIndexes.contains(index)),
+          child: widget.itemBuilder?.call(
+                context,
+                widget.items.elementAt(index),
+                index,
+                selectedIndexes.contains(index),
+              ) ??
+              Text(
+                "${widget.items.elementAt(index)}",
+                style: selectedIndexes.contains(index)
+                    ? _defaultTextStyle
+                    : _defaultTextStyle.copyWith(
+                        color: widget.selectedColor ??
+                            Theme.of(context).colorScheme.primary,
+                      ),
+              ),
         )
     ];
   }
@@ -1303,9 +1394,12 @@ class DropdownFieldState<T> extends State<DropdownField<T>> with WidgetsBindingO
   }
 
   TextStyle get _defaultTextStyle {
-    var defaultTextStyle = Theme.of(context).textTheme.titleMedium ?? const TextStyle();
+    var defaultTextStyle =
+        Theme.of(context).textTheme.titleMedium ?? const TextStyle();
     defaultTextStyle = defaultTextStyle.copyWith(
-      color: widget.enabled ? widget.enabledColor : widget.disabledColor ?? Theme.of(context).disabledColor,
+      color: widget.enabled
+          ? widget.enabledColor
+          : widget.disabledColor ?? Theme.of(context).disabledColor,
     );
 
     return defaultTextStyle;
@@ -1341,7 +1435,8 @@ class DropdownFieldState<T> extends State<DropdownField<T>> with WidgetsBindingO
 
     final RenderBox itemBox = context.findRenderObject()! as RenderBox;
     final itemSize = itemBox.size;
-    final Offset itemOffset = itemBox.localToGlobal(Offset.zero, ancestor: navigator.context.findRenderObject());
+    final Offset itemOffset = itemBox.localToGlobal(Offset.zero,
+        ancestor: navigator.context.findRenderObject());
 
     var maxHeight = widget.itemConstraints.maxHeight;
     var itemHeight = math.min(maxHeight, widget.itemHeight ?? double.infinity);
@@ -1349,15 +1444,20 @@ class DropdownFieldState<T> extends State<DropdownField<T>> with WidgetsBindingO
     itemHeight = math.max(itemHeight, widget.itemConstraints.minHeight);
     itemHeight = math.max(itemHeight, itemSize.height);
 
-    final Rect buttonRect = Rect.fromLTWH(itemOffset.dx, itemOffset.dy + itemSize.height + 8, itemSize.width, itemHeight);
+    final Rect buttonRect = Rect.fromLTWH(itemOffset.dx,
+        itemOffset.dy + itemSize.height + 8, itemSize.width, itemHeight);
 
     _dropdownRoute = DropdownRoute<T>(
       items: menuItems,
+      originalItems: widget.items,
+      menuBuilder: widget.menuBuilder,
       buttonRect: buttonRect,
       padding: widget.menuItemPadding.resolve(Directionality.maybeOf(context)),
-      selectedIndexes: widget.initialSelected.isNotEmpty ? widget.initialSelected : [0],
+      selectedIndexes:
+          widget.initialSelected.isNotEmpty ? widget.initialSelected : [0],
       elevation: widget.elevation,
-      capturedThemes: InheritedTheme.capture(from: context, to: navigator.context),
+      capturedThemes:
+          InheritedTheme.capture(from: context, to: navigator.context),
       style: _textStyle,
       barrierLabel: MaterialLocalizations.of(context).modalBarrierDismissLabel,
       itemHeight: widget.itemHeight,
@@ -1372,7 +1472,9 @@ class DropdownFieldState<T> extends State<DropdownField<T>> with WidgetsBindingO
     );
 
     focusNode?.requestFocus();
-    navigator.push(_dropdownRoute!).then<void>((DropdownRouteResult<T>? newValue) {
+    navigator
+        .push(_dropdownRoute!)
+        .then<void>((DropdownRouteResult<T>? newValue) {
       _removeDropdownRoute();
       if (!mounted || newValue == null) {
         return;
@@ -1391,10 +1493,8 @@ class DropdownFieldState<T> extends State<DropdownField<T>> with WidgetsBindingO
       } else {
         widget.onChanged?.call([newValue.index]);
       }
-          widget.onTap?.call(newValue.index);
-
+      widget.onTap?.call(newValue.index);
     });
-
   }
 
   // When isDense is true, reduce the height of this button from _kMenuItemHeight to
@@ -1402,8 +1502,10 @@ class DropdownFieldState<T> extends State<DropdownField<T>> with WidgetsBindingO
   // Similarly, we don't reduce the height of the button so much that its icon
   // would be clipped.
   double get _denseButtonHeight {
-    final double fontSize = _textStyle.fontSize ?? Theme.of(context).textTheme.titleMedium!.fontSize!;
-    final double scaledFontSize = MediaQuery.textScalerOf(context).scale(fontSize);
+    final double fontSize = _textStyle.fontSize ??
+        Theme.of(context).textTheme.titleMedium!.fontSize!;
+    final double scaledFontSize =
+        MediaQuery.textScalerOf(context).scale(fontSize);
     return math.max(scaledFontSize, kDenseButtonHeight);
   }
 
@@ -1431,7 +1533,9 @@ class DropdownFieldState<T> extends State<DropdownField<T>> with WidgetsBindingO
       // If there's no MediaQuery, then use the view aspect to determine
       // orientation.
       final Size size = View.of(context).physicalSize;
-      result = size.width > size.height ? Orientation.landscape : Orientation.portrait;
+      result = size.width > size.height
+          ? Orientation.landscape
+          : Orientation.portrait;
     }
     return result;
   }
@@ -1451,18 +1555,29 @@ class DropdownFieldState<T> extends State<DropdownField<T>> with WidgetsBindingO
 
     return _buildChild(context);
   }
-  
+
   Widget _buildChild(BuildContext context) {
-    Widget child;
+    Widget child = Container();
 
     final decoration = effectiveDecoration;
-    if (widget.hint != null || widget.disabled && widget.disabledHint != null || decoration.hintText != null) {
-      child = widget.childBuilder(context, widget.items, selectedIndexes) ??_buildHintWidget(context, decoration);
+    if (selectedIndexes.isEmpty) {
+      if (widget.hint != null ||
+          widget.disabled && widget.disabledHint != null ||
+          decoration.hintText != null) {
+        child = widget.childBuilder?.call(context, widget.items, []) ??
+            _buildHintWidget(context, decoration);
+      }
     } else {
-      child = widget.childBuilder(context, widget.items, selectedIndexes) ?? Container();
+      final selectedItems = widget.items
+          .where((item) => selectedIndexes.contains(widget.items.indexOf(item)))
+          .toList();
+      child =
+          widget.childBuilder?.call(context, widget.items, selectedIndexes) ??
+              Text(selectedItems.join(", "));
     }
 
-    child = DropdownMenuItemContainer(alignment: widget.alignment, child: child);
+    child =
+        DropdownMenuItemContainer(alignment: widget.alignment, child: child);
 
     if (!widget.isDense) {
       if (widget.height != null) {
@@ -1492,7 +1607,8 @@ class DropdownFieldState<T> extends State<DropdownField<T>> with WidgetsBindingO
       child = Padding(padding: widget.padding!, child: child);
     }
 
-    final MouseCursor effectiveMouseCursor = WidgetStateProperty.resolveAs<MouseCursor>(
+    final MouseCursor effectiveMouseCursor =
+        WidgetStateProperty.resolveAs<MouseCursor>(
       WidgetStateMouseCursor.clickable,
       <WidgetState>{
         if (!widget.enabled) WidgetState.disabled,
@@ -1517,11 +1633,12 @@ class DropdownFieldState<T> extends State<DropdownField<T>> with WidgetsBindingO
       ),
     );
   }
-  
+
   Widget _buildHintWidget(BuildContext context, InputDecoration decoration) {
     Widget enableHint = widget.hint ?? Text(decoration.hintText!);
 
-    var hintWidget = widget.enabled ? enableHint : widget.disabledHint ?? enableHint;
+    var hintWidget =
+        widget.enabled ? enableHint : widget.disabledHint ?? enableHint;
 
     if (decoration.hintTextDirection != null) {
       hintWidget = Directionality(
@@ -1531,7 +1648,8 @@ class DropdownFieldState<T> extends State<DropdownField<T>> with WidgetsBindingO
     }
 
     hintWidget = DefaultTextStyle(
-      style: decoration.hintStyle ?? _textStyle.copyWith(color: Theme.of(context).hintColor),
+      style: decoration.hintStyle ??
+          _textStyle.copyWith(color: Theme.of(context).hintColor),
       maxLines: decoration.hintMaxLines,
       child: hintWidget,
     );
@@ -1552,13 +1670,14 @@ class DropdownFieldState<T> extends State<DropdownField<T>> with WidgetsBindingO
 
   InputDecoration get effectiveDecoration {
     var result = widget.decoration ?? const InputDecoration();
-    if (result.suffix == null && result.suffixIcon == null && result.suffixText == null) {
-      result = result
-          .applyDefaults(Theme.of(context).inputDecorationTheme)
-          .copyWith(
-        suffixIcon: const Icon(Icons.arrow_drop_down),
-        suffixIconColor: _iconColor,
-      );
+    if (result.suffix == null &&
+        result.suffixIcon == null &&
+        result.suffixText == null) {
+      result =
+          result.applyDefaults(Theme.of(context).inputDecorationTheme).copyWith(
+                suffixIcon: const Icon(Icons.arrow_drop_down),
+                suffixIconColor: _iconColor,
+              );
     }
     return result;
   }
@@ -1590,8 +1709,9 @@ class DropdownFormField<T> extends FormField<Iterable<int>> {
   DropdownFormField({
     super.key,
     required List<T> items,
-    required DropdownChildBuilder<T> childBuilder,
-    required DropdownItemBuilder<T> itemBuilder,
+    DropdownChildBuilder<T>? childBuilder,
+    DropdownItemBuilder<T>? itemBuilder,
+    DropdownMenuBuilder<T>? menuBuilder,
     DropdownFieldBuilder? selectedItemBuilder,
     Iterable<int> initialSelected = const [],
     Widget? hint,
@@ -1627,14 +1747,17 @@ class DropdownFormField<T> extends FormField<Iterable<int>> {
           autovalidateMode: autovalidateMode ?? AutovalidateMode.disabled,
           builder: (field) {
             final state = field as DropdownFormFieldState<T>;
-            final InputDecoration decorationArg = decoration ?? InputDecoration(focusColor: focusColor);
-            final InputDecoration effectiveDecoration = decorationArg.applyDefaults(
+            final InputDecoration decorationArg =
+                decoration ?? InputDecoration(focusColor: focusColor);
+            final InputDecoration effectiveDecoration =
+                decorationArg.applyDefaults(
               Theme.of(field.context).inputDecorationTheme,
             );
 
             final bool showSelectedItem = items.contains(state.value);
             bool isHintOrDisabledHintAvailable() {
-              final bool isDropdownDisabled = onChanged == null || (items.isEmpty);
+              final bool isDropdownDisabled =
+                  onChanged == null || (items.isEmpty);
               if (isDropdownDisabled) {
                 return hint != null || disabledHint != null;
               } else {
@@ -1642,7 +1765,8 @@ class DropdownFormField<T> extends FormField<Iterable<int>> {
               }
             }
 
-            final bool isEmpty = !showSelectedItem && !isHintOrDisabledHintAvailable();
+            final bool isEmpty =
+                !showSelectedItem && !isHintOrDisabledHintAvailable();
             final bool hasError = effectiveDecoration.errorText != null;
 
             // An unfocusable Focus widget so that this widget can detect if its
@@ -1684,6 +1808,7 @@ class DropdownFormField<T> extends FormField<Iterable<int>> {
                     items: items,
                     childBuilder: childBuilder,
                     itemBuilder: itemBuilder,
+                    menuBuilder: menuBuilder,
                     initialSelected: state.value ?? [],
                     hint: hint,
                     disabledHint: disabledHint,
@@ -1704,7 +1829,8 @@ class DropdownFormField<T> extends FormField<Iterable<int>> {
                     enableFeedback: enableFeedback,
                     alignment: alignment,
                     borderRadius: borderRadius ?? effectiveBorderRadius(),
-                    decoration: effectiveDecoration.copyWith(errorText: field.errorText),
+                    decoration: effectiveDecoration.copyWith(
+                        errorText: field.errorText),
                     isEmpty: isEmpty,
                     isFocused: isFocused,
                     padding: padding,
@@ -1732,7 +1858,8 @@ class DropdownFormField<T> extends FormField<Iterable<int>> {
 }
 
 class DropdownFormFieldState<T> extends FormFieldState<Iterable<int>> {
-  DropdownFormField<T> get _dropdownButtonFormField => widget as DropdownFormField<T>;
+  DropdownFormField<T> get _dropdownButtonFormField =>
+      widget as DropdownFormField<T>;
 
   @override
   void didChange(value) {
